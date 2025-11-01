@@ -1,11 +1,17 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider = "prisma-client-js"
-  output   = "/app/prisma/prisma-client"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,7 +21,6 @@ model User {
   password         String
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
-  cartId           Int
   phone            String            @unique
   provider         String?
   providerId       String?
@@ -24,6 +29,8 @@ model User {
   Cart             Cart?
   Order            Order[]
   VerificationCode VerificationCode?
+
+  @@unique([email, phone])
 }
 
 model Categoty {
@@ -35,62 +42,69 @@ model Categoty {
 }
 
 model Product {
-  id           Int           @id @default(autoincrement())
-  name         String
-  imageUrl     String
-  descriprion  String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @default(now())
-  categoryID   Int
-  ingredientId Int?
-  category     Categoty      @relation(fields: [categoryID], references: [id])
-  Ingredient   Ingredient?   @relation(fields: [ingredientId], references: [id])
-  ProductItem  ProductItem[]
+  id          Int           @id @default(autoincrement())
+  name        String
+  imageUrl    String
+  descriprion String?
+  ingredients Ingredient[]
+  items       ProductItem[]
+  category    Categoty      @relation(fields: [categoryID], references: [id])
+  categoryID  Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model ProductItem {
-  id        Int        @id @default(autoincrement())
-  name      String
+  id        Int  @id @default(autoincrement())
   size      Int
   price     Int?
   pizzaType Int?
-  productId Int
+
   cartItems CartItem[]
-  product   Product    @relation(fields: [productId], references: [id])
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
 }
 
 model Ingredient {
   id        Int        @id @default(autoincrement())
-  name      String     @unique
+  name      String
   price     Int
   imageUrl  String
+  products  Product[]
+  cartItems CartItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now())
-  products  Product[]
-  cartItems CartItem[] @relation("CartItemToIngredient")
 }
 
 model Cart {
-  id         Int        @id @default(autoincrement())
-  userId     Int?       @unique
+  id         Int    @id @default(autoincrement())
   token      String
-  totalAmunt Int        @default(0)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @default(now())
-  user       User?      @relation(fields: [userId], references: [id])
-  items      CartItem[]
+  totalAmunt Int    @default(0)
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @unique
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model CartItem {
-  id            Int          @id @default(autoincrement())
-  productItemId Int
-  cartId        Int
-  quantity      Int
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @default(now())
-  cart          Cart         @relation(fields: [cartId], references: [id])
+  id       Int @id @default(autoincrement())
+  quantity Int
+
+  cart   Cart @relation(fields: [cartId], references: [id])
+  cartId Int
+
   productItem   ProductItem  @relation(fields: [productItemId], references: [id])
-  ingredients   Ingredient[] @relation("CartItemToIngredient")
+  productItemId Int
+  ingredients   Ingredient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
