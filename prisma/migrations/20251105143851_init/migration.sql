@@ -84,7 +84,7 @@ CREATE TABLE "CartItem" (
     "id" SERIAL NOT NULL,
     "quantity" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "cartId" INTEGER NOT NULL,
     "productItemId" INTEGER NOT NULL,
 
@@ -122,6 +122,25 @@ CREATE TABLE "VerificationCode" (
 );
 
 -- CreateTable
+CREATE TABLE "Story" (
+    "id" SERIAL NOT NULL,
+    "previewImageUrl" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Story_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StoryItem" (
+    "id" SERIAL NOT NULL,
+    "storyId" INTEGER NOT NULL,
+    "sourceUrl" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "StoryItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_IngredientToProduct" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL,
@@ -148,9 +167,6 @@ CREATE UNIQUE INDEX "User_email_phone_key" ON "User"("email", "phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Categoty_name_key" ON "Categoty"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Ingredient_name_key" ON "Ingredient"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Cart_userId_key" ON "Cart"("userId");
@@ -190,6 +206,9 @@ ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") RE
 
 -- AddForeignKey
 ALTER TABLE "VerificationCode" ADD CONSTRAINT "VerificationCode_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StoryItem" ADD CONSTRAINT "StoryItem_storyId_fkey" FOREIGN KEY ("storyId") REFERENCES "Story"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_IngredientToProduct" ADD CONSTRAINT "_IngredientToProduct_A_fkey" FOREIGN KEY ("A") REFERENCES "Ingredient"("id") ON DELETE CASCADE ON UPDATE CASCADE;
